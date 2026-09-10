@@ -1,4 +1,5 @@
 name: agda-unimath CI
+run-name: "agda-unimath CI ${{ inputs.leg || github.event_name }} ${{ inputs.racecar_run }}"
 on:
   # To run this workflow manually
   workflow_dispatch:
@@ -8,6 +9,19 @@ on:
         required: true
         default: master
 
+      leg:
+        description: "baseline (uninstrumented) or instrumented (under chalk/curiosity)"
+        type: choice
+        options: [instrumented, baseline]
+        default: baseline
+      profile:
+        description: "CrashOverride chalk profile"
+        type: string
+        default: curiosity-tests-racecar
+      racecar_run:
+        description: "racecar correlation token, echoed into the run name"
+        type: string
+        default: ""
   pull_request:
     branches:
       - master
@@ -17,6 +31,9 @@ on:
       - synchronize
       - ready_for_review
 
+
+env:
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 # Cancel previous runs of the same branch
 concurrency:
   group: '${{ github.workflow }}-${{ github.head_ref || github.run_id }}'
